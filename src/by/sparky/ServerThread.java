@@ -1,5 +1,9 @@
 package by.sparky;
 
+import static by.sparky.ClientConnectionState.WAIT;
+import static by.sparky.ClientConnectionState.ACCEPT;
+import static by.sparky.ClientConnectionState.CONNECT;
+import static by.sparky.ClientConnectionState.DISCONNECT;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -9,6 +13,7 @@ import java.net.SocketException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
 //WSMA Recceiver
 public class ServerThread extends Thread {
 
@@ -17,10 +22,11 @@ public class ServerThread extends Thread {
     private static final int DEFAULT_PORT = 8888;
 
     private int controlledPort = DEFAULT_PORT;
+    private ClientConnectionState state = WAIT;
     private DatagramSocket serverSocket;
     private boolean portListed = false;
 
-    private Map<ClientStatus, ClientRequestHandler> requestHandlerMap = new HashMap<>();
+    private Map<ClientConnectionState, ClientRequestHandler> requestHandlerMap = new HashMap<>();
 
     ServerThread() {
         this(-1, null);
@@ -53,22 +59,24 @@ public class ServerThread extends Thread {
         };
 
         ClientRequestHandler accept = (inetAddress) -> {
-            byte [] buffer = ClientStatus.ACCEPT.getCode();
+            byte [] buffer = ClientConnectionState.ACCEPT.code();
             sendPacket(new DatagramPacket(buffer, buffer.length, inetAddress, 8888));
         };
 
         ClientRequestHandler connect = (inetAddress) -> {
-            byte [] buffer = ClientStatus.CONNECT.getCode();
+            byte [] buffer = ClientConnectionState.CONNECT.code();
             sendPacket(new DatagramPacket(buffer, buffer.length, inetAddress, 8888));
         };
         ClientRequestHandler disconnect = (inetAddress) -> {
             System.out.println("Client " + inetAddress.getCanonicalHostName() + " has disconnected");
         };
 
-        requestHandlerMap.put(ClientStatus.SCAN, scan);
-        requestHandlerMap.put(ClientStatus.ACCEPT, accept);
-        requestHandlerMap.put(ClientStatus.CONNECT, connect);
-        requestHandlerMap.put(ClientStatus.DISCONNECT, disconnect);
+
+
+        requestHandlerMap.put(ClientConnectionState.WAIT, scan);
+        requestHandlerMap.put(ClientConnectionState.ACCEPT, accept);
+        requestHandlerMap.put(ClientConnectionState.CONNECT, connect);
+        requestHandlerMap.put(ClientConnectionState.DISCONNECT, disconnect);
     }
 
     private void attachServer(int port) { //не понятно что делать, если не удалось всё-таки занять порт
@@ -86,34 +94,34 @@ public class ServerThread extends Thread {
 
     //1 step
     private DatagramPacket waitClient() {
-        byte[] status = new byte[2];
-        DatagramPacket p = new DatagramPacket(status, status.length);
-        try {
-            serverSocket.receive(p);
-        } catch (IOException e) {
-            System.out.println("Error recieve client status. " + e.getMessage() + " data: " + Arrays.toString(p.getData()));
-            e.printStackTrace();
-        }
-        System.out.println("Client pecked");
-        System.out.println("Host Address: " + p.getAddress().getHostAddress());
-        System.out.println("Port:" + p.getPort());
-        System.out.println("Data: " + Arrays.toString(p.getData()));
 
-        return p;
+
+
+        byte[] buffer = new byte[2];
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+//        serverSocket.receive(packet);
+//
+//        for (ClientStatus : ClientConnectionState.values()) {
+//
+//        }
+//
+
+        return packet;
     }
 
     private void serviceClient(InetAddress clientAdress) {
         while(true) {
+
             byte[] status = new byte[2];
             byte[] clientData = waitClient().getData();
             status[0] = clientData[0];
             status[1] = clientData[1];
 
-            for (ClientStatus clientStatus : ClientStatus.values()) {
-                if (Arrays.equals(clientStatus.getCode(), status)) {
+            for (ClientConnectionState clientConnectionState : ClientConnectionState.values()) {
+                if (Arrays.equals(clientConnectionState.code(), status)) {
 
-                    System.out.println("Client service: request for " + clientStatus.name());
-                    ClientRequestHandler handler = requestHandlerMap.get(clientStatus);
+                    System.out.println("Client service: request for " + clientConnectionState.name());
+                    ClientRequestHandler handler = requestHandlerMap.get(clientConnectionState);
                     handler.handle(clientAdress);
                 }
             }
@@ -125,31 +133,24 @@ public class ServerThread extends Thread {
 
     @Override
     public void run() {
-        DatagramPacket packet = waitClient();
-        InetAddress clientAdress = packet.getAddress();
 
-        serviceClient(clientAdress);
+        while(true) {
+            DatagramPacket packet = waitClient();
+            packet.getData();
+
+
+        }
+
+
+
+
+
+//        InetAddress clientAdress = packet.getAddress();
+
+//        serviceClient(clientAdress);
     }
 
 
-
-    public void some() throws IOException {
-        //getting connection state and sender inet address
-        byte[] data = new byte[2];
-        //data[0] = 4, data[0] = 4 is connection out
-        //data[0] = 3, data[0] = 3 is status connected. set host adress and
-        //data[0] = 2, data[0] = 2 is
-        //data[0] = 1, data[0] = 1 is connection established. sender ready for authorization
-        DatagramPacket datagramPacket = new DatagramPacket(data, data.length);
-        serverSocket.receive(datagramPacket);
-        InetAddress inetAddress = datagramPacket.getAddress();
-
-
-        DatagramSocket socket;
-        byte[] buffer;
-
-
-    }
 
     public void waitConnection() throws IOException {
         //data 1 1
@@ -168,33 +169,6 @@ public class ServerThread extends Thread {
         socket.close();
     }
 
-    public void acceptConnection() throws IOException {
-        //data 2 2
-        DatagramSocket socket = new DatagramSocket();
-
-
-        byte[] status = new byte[] {2, 2};
-        DatagramPacket packet = new DatagramPacket(status, status.length); //TODO
-        socket.send(packet);
-        socket.close();
-    }
-
-    public void establishedConnection() throws IOException {
-        //data 3 3
-        DatagramSocket socket = new DatagramSocket();
-
-
-        byte[] status = new byte[] {3, 3}; //TODO 3 - if ip == client adress else 0
-        DatagramPacket packet = new DatagramPacket(status, status.length); //TODO
-        socket.send(packet);
-        socket.close();
-        //TODO run connection waiter
-    }
-
-    public void clientWouldDisconnect() {
-        //data 4 4
-
-    }
 
     public void sendPacket(DatagramPacket packet) {
         try (DatagramSocket socket = new DatagramSocket()) {
