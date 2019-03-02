@@ -1,5 +1,8 @@
 package by.sparky;
 
+import java.io.IOException;
+import java.net.DatagramSocket;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -7,7 +10,12 @@ public class Main {
     }
 
     private void start() {
-        ServerThread server = new ServerThread(8888, "Sparky Server");
-        server.start();
+        try {
+            DatagramSocket socket = new DatagramSocket(8888);
+            SocketClientService server = new SocketClientService(socket);
+            server.start();
+        } catch (IOException e) {
+            System.out.println("Server fail start");
+        }
     }
 }

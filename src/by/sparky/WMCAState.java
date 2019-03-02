@@ -1,6 +1,7 @@
 package by.sparky;
 
-public enum ClientConnectionState {
+public enum WMCAState {
+    NONE(new byte[] {0, 0}),
     WAIT(new byte[] {1, 1}),
     ACCEPT(new byte[] {2, 2}),
     CONNECT(new byte[] {3, 3}),
@@ -8,7 +9,7 @@ public enum ClientConnectionState {
 
     private byte[] code;
 
-    ClientConnectionState(byte[] code) {
+    WMCAState(byte[] code) {
         this.code = code;
     }
 
