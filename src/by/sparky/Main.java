@@ -1,21 +1,16 @@
 package by.sparky;
 
-import java.io.IOException;
 import java.net.DatagramSocket;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 	    new Main().start();
     }
 
-    private void start() {
-        try {
-            DatagramSocket socket = new DatagramSocket(8888);
-            SocketClientService server = new SocketClientService(socket);
-            server.start();
-        } catch (IOException e) {
-            System.out.println("Server fail start");
-        }
+    private void start() throws Exception {
+        DatagramSocket datagramSocket = new DatagramSocket(8888);
+        SocketClientService clientService = new SocketClientService(datagramSocket);
+        clientService.start();
     }
 }

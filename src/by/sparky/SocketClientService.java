@@ -12,6 +12,7 @@ public class SocketClientService {
     private List<ClientSocket> clients = new ArrayList<>();
     private WMCASocketDriver wmcaState;
     private DatagramSocket serviceSocket;
+    private WCMAAudioReceiverDaemon receiverDaemon;
 
     SocketClientService(DatagramSocket serviceSocket) {
         this.serviceSocket = serviceSocket;
@@ -25,8 +26,10 @@ public class SocketClientService {
 
     public void start() {
         System.out.println("Service started!");
-        wmcaState.run();
+        Thread task = new Thread(wmcaState);
+        task.start();
         InetAddress clientAddress = null;
+
         while(clientAddress == null) {
             clientAddress = wmcaState.getAddress();
             try {
@@ -35,30 +38,36 @@ public class SocketClientService {
                 e.printStackTrace();
             }
         }
+
         ClientSocket client = new ClientSocket(clientAddress);
 
+        runDaemon();
         while(true) {
             switch (wmcaState.getState()) {
                 case WAIT:
-                    client.sendData(serviceSocket, "MyServer:8887");
+                    client.sendMessage("MyServer:8888".getBytes());
                     break;
                 case ACCEPT:
-                    client.sendData(serviceSocket, WMCAState.ACCEPT.code());
+                    client.sendMessage(WMCAState.ACCEPT.code());
                     break;
                 case CONNECT:
-                    client.sendData(serviceSocket, WMCAState.CONNECT.code());
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    client.sendMessage(WMCAState.CONNECT.code());
                     break;
                 case DISCONNECT:
-                    System.out.println("Client directly disconnected");
+                    System.out.println("Client has been disconnected");
                     break;
-            }
+                 default:
 
-//
+            }
         }
+    }
+
+    private void runDaemon() {
+        try {
+            this.receiverDaemon = new WCMAAudioReceiverDaemon();
+        } catch (SocketException e) {
+            System.out.println("Error: Audio Recevier Daemon is not running");
+        }
+        this.receiverDaemon.start();
     }
 }

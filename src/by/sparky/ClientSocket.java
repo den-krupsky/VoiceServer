@@ -1,31 +1,41 @@
 package by.sparky;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
+import java.net.*;
 import java.util.Arrays;
 
 public class ClientSocket {
+
+    private int port = 8888;
     private InetAddress clientAddress;
+    private DatagramSocket socket = null;
+    private DatagramPacket packet;
 
-    ClientSocket(InetAddress inetAddress) {
-        this.clientAddress = inetAddress;
-    }
 
-    public void sendData(DatagramSocket socket, byte[] data) {
-        DatagramPacket packet = new DatagramPacket(data, data.length, clientAddress, 8888);
+    ClientSocket(InetAddress clientAddress) {
+        this.clientAddress = clientAddress;
         try {
-            System.out.println("send data + " + Arrays.toString(packet.getData()));
-            socket.send(packet);
-
-        } catch (IOException e) {
+            this.socket = new DatagramSocket(0);
+        } catch (SocketException e) {
             e.printStackTrace();
         }
     }
 
-    public void sendData(DatagramSocket socket, String str) {
-        byte[] data = str.getBytes();
-        sendData(socket, data);
+    public void sendMessage(byte[] msg) {
+        try {
+            DatagramPacket packet = new DatagramPacket(msg, msg.length, clientAddress, port);
+            socket.send(packet);
+            System.out.println("Response: " + Arrays.toString(packet.getData()));
+            System.out.println("From address: " + socket.getLocalAddress().toString());
+            System.out.println("On address: " + packet.getAddress().toString());
+            System.out.println("From local Socket: " + socket.getLocalSocketAddress().toString());
+            System.out.println("On Socket: " + packet.getSocketAddress().toString());
+            System.out.println();
+        } catch (UnknownHostException e) {
+            System.out.println("Sender| error send message. Cause: error host by name ");
+        } catch (IOException e) {
+            System.out.println("Sender| error send message");
+        }
     }
+
 }

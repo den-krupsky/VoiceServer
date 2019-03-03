@@ -56,6 +56,7 @@ public class WCMAAudioReceiverDaemon extends Thread {
             DatagramPacket packet = new DatagramPacket(receiveData, receiveData.length);
             try {
                 socket.receive(packet);
+                System.out.println("AudioPacket is getting by Daemon Thread");
                 this.audioPacket = packet;
                 isNewIncoming = true;
             } catch (IOException e) {
