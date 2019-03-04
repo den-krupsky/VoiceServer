@@ -42,10 +42,12 @@ public class SocketClientService {
         ClientSocket client = new ClientSocket(clientAddress);
 
         runDaemon();
-        while(true) {
+//        while(true) {
             switch (wmcaState.getState()) {
                 case WAIT:
-                    client.sendMessage("MyServer:8888".getBytes());
+                    String serverName = "lib_test_server:";
+                    int receiverPort = receiverDaemon.getReceiverPort();
+                    client.sendMessage((serverName + receiverPort).getBytes());
                     break;
                 case ACCEPT:
                     client.sendMessage(WMCAState.ACCEPT.code());
@@ -56,10 +58,9 @@ public class SocketClientService {
                 case DISCONNECT:
                     System.out.println("Client has been disconnected");
                     break;
-                 default:
 
             }
-        }
+//        }
     }
 
     private void runDaemon() {

@@ -9,7 +9,7 @@ import java.util.Arrays;
 public class WMCASocketDriver implements Runnable {
 
     private volatile WMCAState state = WMCAState.NONE;
-    private byte[] codeState = new byte[4096];
+    private byte[] codeState = new byte[2];
     private DatagramPacket packet = new DatagramPacket(codeState, codeState.length);
     private DatagramSocket socket;
 
@@ -20,19 +20,14 @@ public class WMCASocketDriver implements Runnable {
     private void waitState() {
         try {
             socket.receive(packet);
-            if (packet.getLength() > 2) {
-                System.out.println("Arrived audio packet " + packet.getLength());
-            } else {
-                System.out.println("Request: " + Arrays.toString(packet.getData()));
-                System.out.println("Address: " + packet.getAddress().toString());
-                System.out.println("My Address: " + socket.getLocalAddress().toString());
-                System.out.println("Socket: " + packet.getSocketAddress().toString());
-                System.out.println("Socket: " + socket.getLocalSocketAddress().toString());
-                System.out.println();
-                changeState();
-                System.out.println("Changed state to " + state.name());
-            }
-
+            System.out.println("Request: " + Arrays.toString(packet.getData()));
+            System.out.println("Address: " + packet.getAddress().toString());
+            System.out.println("My Address: " + socket.getLocalAddress().toString());
+            System.out.println("Socket: " + packet.getSocketAddress().toString());
+            System.out.println("Socket: " + socket.getLocalSocketAddress().toString());
+            System.out.println();
+            changeState();
+            System.out.println("Changed state to " + state.name());
         }
         catch (IOException e) {
             state = WMCAState.NONE;
@@ -42,7 +37,7 @@ public class WMCASocketDriver implements Runnable {
 
     private void changeState() {
         for (WMCAState state : WMCAState.values()) {
-            if (Arrays.equals(state.code(), Arrays.copyOf(codeState, 2))) this.state = state;
+            if (Arrays.equals(state.code(), codeState)) this.state = state;
         }
     }
 

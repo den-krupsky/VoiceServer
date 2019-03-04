@@ -25,16 +25,8 @@ public class ClientSocket {
         try {
             DatagramPacket packet = new DatagramPacket(msg, msg.length, clientAddress, port);
             socket.send(packet);
-            System.out.println("Response: " + Arrays.toString(packet.getData()));
-            System.out.println("From address: " + socket.getLocalAddress().toString());
-            System.out.println("On address: " + packet.getAddress().toString());
-            System.out.println("From local Socket: " + socket.getLocalSocketAddress().toString());
-            System.out.println("On Socket: " + packet.getSocketAddress().toString());
-            System.out.println();
-        } catch (UnknownHostException e) {
-            System.out.println("Sender| error send message. Cause: error host by name ");
         } catch (IOException e) {
-            System.out.println("Sender| error send message");
+            //do nothing
         }
     }
 

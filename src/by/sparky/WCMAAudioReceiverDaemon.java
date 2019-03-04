@@ -5,11 +5,14 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.Random;
 
 public class WCMAAudioReceiverDaemon extends Thread {
 
-    private static final int AUDIO_PORT = 0;
+
+
     private static final int TIMEOUT = 3000;
+    private final int audioPort;
     private DatagramSocket socket;
     private AudioFormat audioFormat;
     private SourceDataLine sourceDataLine;
@@ -27,8 +30,9 @@ public class WCMAAudioReceiverDaemon extends Thread {
     }
 
     WCMAAudioReceiverDaemon() throws SocketException {
-        this.socket = new DatagramSocket(AUDIO_PORT);
+        socket = new DatagramSocket(0);
         socket.setSoTimeout(TIMEOUT);
+        audioPort = socket.getLocalPort();
     }
 
     //magic
@@ -46,7 +50,7 @@ public class WCMAAudioReceiverDaemon extends Thread {
 
     @Override
     public void run() {
-        this.isNewIncoming = true;
+        initAudio();
         listen();
     }
 
@@ -58,6 +62,8 @@ public class WCMAAudioReceiverDaemon extends Thread {
                 socket.receive(packet);
                 System.out.println("AudioPacket is getting by Daemon Thread");
                 this.audioPacket = packet;
+
+                sourceDataLine.write(packet.getData(), 0, packet.getLength());
                 isNewIncoming = true;
             } catch (IOException e) {
                 //do nothing
@@ -66,13 +72,15 @@ public class WCMAAudioReceiverDaemon extends Thread {
     }
 
     public byte[] getAudio() {
-        if (this.isNewIncoming) {
-            isNewIncoming = false;
-        }
+        if (isNewIncoming) isNewIncoming = false;
         return audioPacket.getData();
     }
 
     public boolean isIncoming() {
-        return this.isNewIncoming;
+        return isNewIncoming;
+    }
+
+    public int getReceiverPort() {
+        return audioPort;
     }
 }
