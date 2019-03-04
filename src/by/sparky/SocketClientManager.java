@@ -1,5 +1,6 @@
 package by.sparky;
 
+import javax.xml.bind.SchemaOutputResolver;
 import java.io.IOException;
 import java.net.*;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ public class SocketClientManager {
     private DatagramPacket packet;
 
     SocketClientManager() throws SocketException {
+        this.socket = new DatagramSocket(0);
     }
 
 
@@ -25,6 +27,7 @@ public class SocketClientManager {
     }
 
     public void register(InetAddress inetAddress) {
+        System.out.println("Registered new client: " + inetAddress.getHostAddress() + ":" + inetAddress);
         clients.put(inetAddress.getHostAddress(), inetAddress);
     }
 

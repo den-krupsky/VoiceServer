@@ -17,23 +17,26 @@ public class WMSAService extends Thread {
         this.audioSocketListener = new WMSAAudioSocketListener();
         this.socketListener = new WMSASocketListener(DEFAULT_PORT);
         audioSocketListener.start();
-        socketListener.start();
+        //socketListener.start();
         this.clientManager = new SocketClientManager();
     }
 
     @Override
     public void run() {
-        while(socketListener.isRequestAvailable()) {
+        System.out.println("Service is running!");
+        while(true) {
             DatagramPacket packet = socketListener.getPacket();
-
+            handleRequest(packet);
         }
+
     }
 
     private void handleRequest(DatagramPacket packet) {
         InetAddress clientAddress = packet.getAddress();
 
-        for (WMCAState request : WMCAState.values()) {
+        for (WMSAState request : WMSAState.values()) {
             if (Arrays.equals(request.code(), packet.getData())) {
+                System.out.println("Get packet from " + packet.getSocketAddress().toString() + " with data " + Arrays.toString(packet.getData()));
                 switch (request) {
                     case WAIT:
                         if (!clientManager.isRegistered(clientAddress.getHostAddress())) {
@@ -44,15 +47,15 @@ public class WMSAService extends Thread {
                         break;
                     case CONNECT:
                         if(clientManager.isRegistered(clientAddress.getHostAddress())) {
-                           clientManager.sendMessage(WMCAState.CONNECT.code(), clientAddress);
+                           clientManager.sendMessage(WMSAState.CONNECT.code(), clientAddress);
                            clientManager.setClient(clientAddress);
                         }
                         break;
                     case ACCEPT:
                         if (clientManager.checkClient(clientAddress)) {
-                            clientManager.sendMessage(WMCAState.ACCEPT.code(), clientAddress);
+                            clientManager.sendMessage(WMSAState.ACCEPT.code(), clientAddress);
                         } else {
-                            clientManager.sendMessage(WMCAState.NONE.code(), clientAddress);
+                            clientManager.sendMessage(WMSAState.NONE.code(), clientAddress);
                         }
                         break;
                     case DISCONNECT:

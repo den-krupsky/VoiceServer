@@ -50,6 +50,7 @@ public class WMSAAudioSocketListener extends Thread {
 
     @Override
     public void run() {
+        System.out.println(Thread.currentThread().getName() + " started on port number " + socket.getLocalPort());
         initAudio();
         listen();
     }

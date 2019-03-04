@@ -1,7 +1,5 @@
 package by.sparky;
 
-import java.net.DatagramSocket;
-
 public class Main {
 
     public static void main(String[] args) throws Exception {
@@ -9,6 +7,7 @@ public class Main {
     }
 
     private void start() throws Exception {
-        //TODO test code
+        WMSAService service = new WMSAService();
+        service.start();
     }
 }

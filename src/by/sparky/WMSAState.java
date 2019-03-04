@@ -1,6 +1,6 @@
 package by.sparky;
 
-public enum WMCAState {
+public enum WMSAState {
     NONE(new byte[] {0, 0}),
     WAIT(new byte[] {1, 1}),
     ACCEPT(new byte[] {2, 2}),
@@ -9,7 +9,7 @@ public enum WMCAState {
 
     private byte[] code;
 
-    WMCAState(byte[] code) {
+    WMSAState(byte[] code) {
         this.code = code;
     }
 
