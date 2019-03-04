@@ -7,7 +7,7 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.Random;
 
-public class WCMAAudioReceiverDaemon extends Thread {
+public class WMSAAudioSocketListener extends Thread {
 
 
 
@@ -25,11 +25,11 @@ public class WCMAAudioReceiverDaemon extends Thread {
 
     {
         //init daemon thread
-        this.setName("WCMAAudioReceiverDaemon");
+        this.setName("WMSAAudioSocketListener");
         this.setDaemon(true);
     }
 
-    WCMAAudioReceiverDaemon() throws SocketException {
+    WMSAAudioSocketListener() throws SocketException {
         socket = new DatagramSocket(0);
         socket.setSoTimeout(TIMEOUT);
         audioPort = socket.getLocalPort();

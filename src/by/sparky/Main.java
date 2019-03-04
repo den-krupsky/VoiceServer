@@ -9,8 +9,6 @@ public class Main {
     }
 
     private void start() throws Exception {
-        DatagramSocket datagramSocket = new DatagramSocket(8888);
-        SocketClientService clientService = new SocketClientService(datagramSocket);
-        clientService.start();
+        //TODO test code
     }
 }
